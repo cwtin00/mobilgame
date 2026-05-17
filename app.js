@@ -15,6 +15,9 @@ const nightTitle = document.getElementById("nightTitle");
 const nightSubtitle = document.getElementById("nightSubtitle");
 const nightTimer = document.getElementById("nightTimer");
 
+const coinText =
+document.getElementById("coinText");
+
 const voteScreen = document.getElementById("voteScreen");
 const votePlayers = document.getElementById("votePlayers");
 const voteTimer = document.getElementById("voteTimer");
@@ -122,11 +125,21 @@ createRoomBtn.addEventListener("click", () => {
 
     }
 
+    if(getCoins() <= 0){
+
+        showToast("🪙 Yetersiz coin");
+
+        return;
+
+    }
+
     currentPlayerName = playerName;
 
     const roomCode = generateRoomCode();
 
-    firebase.database().ref("rooms/" + roomCode).set({
+    firebase.database()
+    .ref("rooms/" + roomCode)
+    .set({
         gameStarted: false,
         phase: "lobby",
         countdown: false,
@@ -142,12 +155,19 @@ createRoomBtn.addEventListener("click", () => {
                 ready: false
             }
         }
+    })
+    .then(()=>{
+
+        removeCoins(1);
+
+        currentPlayerKey = "host";
+
+        isHost = true;
+
+        openLobby(roomCode);
+
     });
 
-    currentPlayerKey = "host";
-    isHost = true;
-
-    openLobby(roomCode);
 });
 
 const bgMusic =
@@ -175,57 +195,79 @@ const vampireWakeSound =
 document.getElementById("vampireWakeSound");
 
 joinRoomBtn.addEventListener("click", () => {
+
     const playerName = playerNameInput.value.trim();
     const roomCode = roomCodeInput.value.trim().toUpperCase();
 
-if (playerName === "" || roomCode === "") {
+    if (playerName === "" || roomCode === "") {
 
-    showToast("⚠ Tüm bilgileri doldur");
+        showToast("⚠ Tüm bilgileri doldur");
 
-    return;
+        return;
 
-}
+    }
+
+    if (getCoins() <= 0) {
+
+        showToast("🪙 Yetersiz coin");
+
+        return;
+
+    }
+
     currentPlayerName = playerName;
 
-    firebase.database().ref("rooms/" + roomCode).once("value", (roomSnapshot) => {
-if (!roomSnapshot.exists()) {
+    firebase.database()
+    .ref("rooms/" + roomCode)
+    .once("value", (roomSnapshot) => {
 
-    showToast("❌ Böyle bir oda bulunamadı");
+        if (!roomSnapshot.exists()) {
 
-    return;
+            showToast("❌ Böyle bir oda bulunamadı");
 
-}
+            return;
+
+        }
 
         const roomData = roomSnapshot.val();
 
-if (roomData.gameStarted) {
+        if (roomData.gameStarted) {
 
-    showToast("🎮 Oyun başladı");
+            showToast("🎮 Oyun başladı");
 
-    return;
+            return;
 
-}
+        }
 
-        const playersRef = firebase.database().ref("rooms/" + roomCode + "/players");
+        const playersRef =
+        firebase.database()
+        .ref("rooms/" + roomCode + "/players");
 
         playersRef.once("value", (snapshot) => {
+
             const data = snapshot.val();
 
             if (data) {
-                const alreadyExists = Object.values(data).some(
-                    player => player.name.toLowerCase() === playerName.toLowerCase()
+
+                const alreadyExists =
+                Object.values(data).some(
+                    player =>
+                    player.name.toLowerCase() ===
+                    playerName.toLowerCase()
                 );
 
-if (alreadyExists) {
+                if (alreadyExists) {
 
-    showToast("⚠ Bu isim zaten odada kullanılıyor");
+                    showToast("⚠ Bu isim zaten odada kullanılıyor");
 
-    return;
+                    return;
 
-}
+                }
+
             }
 
             const newPlayerRef = playersRef.push();
+
             currentPlayerKey = newPlayerRef.key;
 
             newPlayerRef.set({
@@ -233,11 +275,19 @@ if (alreadyExists) {
                 dead: false,
                 role: null,
                 ready: false
+            })
+            .then(()=>{
+
+                removeCoins(1);
+
+                openLobby(roomCode);
+
             });
 
-            openLobby(roomCode);
         });
+
     });
+
 });
 
 function showToast(message){
@@ -569,15 +619,6 @@ function listenGamePhase(){
 
 }
 
-leaveBtn.addEventListener("click", () => {
-    if (currentRoom && currentPlayerKey) {
-        firebase.database()
-        .ref("rooms/" + currentRoom + "/players/" + currentPlayerKey)
-        .remove();
-    }
-
-    location.reload();
-});
 
 sendBtn.addEventListener("click", sendMessage);
 
@@ -650,6 +691,7 @@ function startCountdown() {
     bgMusic.pause();
 
     bgMusic.currentTime = 0;
+    stopAllSounds();
 
     countdownRunning = false;
     doctorPhaseRunning = false;
@@ -1619,6 +1661,20 @@ function checkWinCondition(callback) {
 
 function showWinScreen(text){
 
+    if(
+    (text.includes("VAMPİR") &&
+    currentRole === "Vampir")
+    ||
+    (text.includes("KÖYLÜ") &&
+    currentRole !== "Vampir")
+){
+
+    addCoins(3);
+
+    showToast("🪙 +3 Coin Kazandın");
+
+}
+
     clearAllGameTimers();
 
     if(isHost){
@@ -1634,6 +1690,7 @@ function showWinScreen(text){
 
 }
 restartGameBtn.addEventListener("click",()=>{
+    stopAllSounds();
 
     
 
@@ -1662,52 +1719,26 @@ if(!isHost){
 
         });
 
-        firebase.database()
-        .ref("rooms/" + currentRoom)
-        .update({
-            countdown:false,
-            gameStarted:false,
-            phase:"lobby",
-            votes:null,
-            protectedPlayer:null,
-            killedPlayer:null,
-            nightResult:null,
-            winner:null
-        });
+firebase.database()
+.ref("rooms/" + currentRoom)
+.update({
+    countdown:false,
+    gameStarted:false,
+    phase:"lobby",
+    votes:null,
+    protectedPlayer:null,
+    killedPlayer:null,
+    nightResult:null,
+    winner:null,
+    voteResultText:null,
+    gameChat:null
+});
 
     });
 
 });
 
-function resetScreensToLobby(){
 
-    clearAllGameTimers();
-    roleShown = false;
-    gamePhaseListenerActive = false;
-    winScreen.classList.add("hidden");
-    gameScreen.classList.add("hidden");
-    nightScreen.classList.add("hidden");
-    voteScreen.classList.add("hidden");
-    roleScreen.classList.add("hidden");
-    countdownScreen.classList.add("hidden");
-
-    document.querySelector(".container")
-    .classList.remove("hidden");
-
-    lobby.classList.remove("hidden");
-
-    vampireTeam.innerHTML = "";
-    voteResult.innerHTML = "";
-
-    currentRole = null;
-
-    countdownRunning = false;
-    doctorPhaseRunning = false;
-    vampirePhaseRunning = false;
-    votingRunning = false;
-    readyListenerStarted = false;
-    votesListenerStarted = false;
-}
 
 function loadVampireTeam() {
     firebase.database()
@@ -1762,7 +1793,7 @@ function escapeHTML(text) {
     .replaceAll("'", "&#039;");
 }
 
-leaveGameBtn.addEventListener("click",()=>{
+leaveBtn.addEventListener("click",()=>{
 
     confirmLeave.classList.remove("hidden");
 
@@ -1780,14 +1811,24 @@ cancelLeaveBtn.addEventListener("click",()=>{
 
 confirmLeaveBtn.addEventListener("click",()=>{
 
-    firebase.database()
-    .ref(
-        "rooms/" +
-        currentRoom +
-        "/players/" +
-        currentPlayerKey
-    )
-    .remove();
+    if(isHost){
+
+        firebase.database()
+        .ref("rooms/" + currentRoom)
+        .remove();
+
+    }else{
+
+        firebase.database()
+        .ref(
+            "rooms/" +
+            currentRoom +
+            "/players/" +
+            currentPlayerKey
+        )
+        .remove();
+
+    }
 
     showToast("✓ Oyundan çıkıldı");
 
@@ -1797,27 +1838,28 @@ confirmLeaveBtn.addEventListener("click",()=>{
 
     },1200);
 
-    
-
 });
 
 function playLobbyMusic(){
 
-    if(
-        currentPhase !== "vampire" &&
-        currentPhase !== "doctor" &&
-        currentPhase !== "vote"
-    ){
-
-        bgMusic.volume = 0.35;
-
-        bgMusic.play()
-        .catch(()=>{});
-
+    if(!bgMusic.paused){
+        return;
     }
 
-}
+    if(
+        currentPhase === "vampire" ||
+        currentPhase === "doctor" ||
+        currentPhase === "vote"
+    ){
+        return;
+    }
 
+    bgMusic.volume = 0.35;
+
+    bgMusic.play()
+    .catch(()=>{});
+
+}
 /* SAYFA AÇILINCA */
 
 window.addEventListener("load",()=>{
@@ -1864,7 +1906,7 @@ function resetScreensToLobby(){
     votesListenerStarted = false;
 
     /* BG MUSIC */
-
+    stopAllSounds();
     playLobbyMusic();
 
 }
@@ -1883,3 +1925,75 @@ document.querySelectorAll("button")
     });
 
 });
+
+function stopAllSounds(){
+
+    bgMusic.pause();
+    countSound.pause();
+    healSound.pause();
+    killSound.pause();
+    deathSound.pause();
+    tickSound.pause();
+    winSound.pause();
+    vampireWakeSound.pause();
+
+    bgMusic.currentTime = 0;
+    countSound.currentTime = 0;
+    healSound.currentTime = 0;
+    killSound.currentTime = 0;
+    deathSound.currentTime = 0;
+    tickSound.currentTime = 0;
+    winSound.currentTime = 0;
+    vampireWakeSound.currentTime = 0;
+
+}
+
+function getCoins(){
+
+    let coins =
+    localStorage.getItem("coins");
+
+    if(coins === null){
+
+        localStorage.setItem("coins",10);
+
+        coins = 10;
+
+    }
+
+    return Number(coins);
+
+}
+
+function setCoins(amount){
+
+    localStorage.setItem("coins",amount);
+
+    updateCoinUI();
+
+}
+
+function addCoins(amount){
+
+    setCoins(
+        getCoins() + amount
+    );
+
+}
+
+function removeCoins(amount){
+
+    setCoins(
+        getCoins() - amount
+    );
+
+}
+
+function updateCoinUI(){
+
+    coinText.textContent =
+    getCoins();
+
+}
+
+updateCoinUI();

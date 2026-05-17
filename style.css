@@ -1540,3 +1540,34 @@ input:focus{
 #confirmLeaveBtn:hover{
     transform:scale(1.03);
 }
+
+.coin-box{
+    position:fixed;
+
+    top:20px;
+    right:20px;
+
+    z-index:9999;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:12px 18px;
+
+    border-radius:18px;
+
+    background:
+    rgba(15,15,18,.88);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(12px);
+
+    color:#ffd54a;
+
+    font-weight:700;
+
+    box-shadow:
+    0 0 20px rgba(255,215,0,.08);
+}
