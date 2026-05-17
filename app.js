@@ -150,6 +150,30 @@ createRoomBtn.addEventListener("click", () => {
     openLobby(roomCode);
 });
 
+const bgMusic =
+document.getElementById("bgMusic");
+
+const countSound =
+document.getElementById("countSound");
+
+const healSound =
+document.getElementById("healSound");
+
+const killSound =
+document.getElementById("killSound");
+
+const deathSound =
+document.getElementById("deathSound");
+
+const tickSound =
+document.getElementById("tickSound");
+
+const winSound =
+document.getElementById("winSound");
+
+const vampireWakeSound =
+document.getElementById("vampireWakeSound");
+
 joinRoomBtn.addEventListener("click", () => {
     const playerName = playerNameInput.value.trim();
     const roomCode = roomCodeInput.value.trim().toUpperCase();
@@ -418,6 +442,9 @@ function openLobby(roomCode) {
         countdownScreen.classList.add("hidden");
 
         winScreen.classList.remove("hidden");
+        winSound.currentTime = 0;
+
+        winSound.play();
 
         winTitle.textContent =
         winner;
@@ -434,6 +461,16 @@ function openLobby(roomCode) {
 
         nightSubtitle.textContent =
         result;
+        if(
+    result.includes("öldürüldü") ||
+    result.includes("ASILDI")
+){
+
+    deathSound.currentTime = 0;
+
+    deathSound.play();
+
+}
 
     });
 
@@ -592,6 +629,9 @@ function loadChat() {
 }
 
 startGameBtn.addEventListener("click", () => {
+    bgMusic.pause();
+
+bgMusic.currentTime = 0;
 
     if (!isHost) {
 
@@ -606,6 +646,10 @@ startGameBtn.addEventListener("click", () => {
 });
 
 function startCountdown() {
+
+    bgMusic.pause();
+
+    bgMusic.currentTime = 0;
 
     countdownRunning = false;
     doctorPhaseRunning = false;
@@ -642,6 +686,9 @@ function runCountdown() {
 
     let count = 3;
     countdownText.textContent = count;
+    countSound.currentTime = 0;
+
+    countSound.play();
 
     const interval = setInterval(() => {
         count--;
@@ -654,6 +701,9 @@ function runCountdown() {
 
             setTimeout(() => {
                 countdownScreen.classList.add("hidden");
+                    countSound.pause();
+
+                    countSound.currentTime = 0;
 
                 if (isHost) {
                     giveRoles();
@@ -959,6 +1009,9 @@ function enableDoctorSelection() {
         playerDiv.classList.add("selectable-player");
 
         playerDiv.onclick = () => {
+            healSound.currentTime = 0;
+
+            healSound.play();
             clearSelections();
 
             playerDiv.classList.add("selected-player");
@@ -995,6 +1048,13 @@ function startVampirePhase(){
 
     nightTitle.textContent = "GECE";
     nightSubtitle.textContent = "Vampir Öldüreceği Kişiyi Seçsin";
+    if(currentRole === "Vampir"){
+
+    vampireWakeSound.currentTime = 0;
+
+    vampireWakeSound.play();
+
+}
 
     let time = 10;
     nightTimer.textContent = time;
@@ -1089,7 +1149,9 @@ function enableVampireSelection(){
             );
 
             playerDiv.onclick = ()=>{
+                killSound.currentTime = 0;
 
+                killSound.play();
                 // Tıklayınca tekrar firebase kontrolü
                 firebase.database()
                 .ref("rooms/" + currentRoom + "/players")
@@ -1318,6 +1380,9 @@ function loadVotePlayers() {
             `;
 
             div.onclick = () => {
+                tickSound.currentTime = 0;
+
+                tickSound.play();
 
                 firebase.database()
                 .ref("rooms/" + currentRoom + "/players/" + currentPlayerKey)
@@ -1570,6 +1635,8 @@ function showWinScreen(text){
 }
 restartGameBtn.addEventListener("click",()=>{
 
+    
+
 if(!isHost){
 
     showToast("⚠ Sadece oda sahibi yeniden başlatabilir");
@@ -1731,5 +1798,88 @@ confirmLeaveBtn.addEventListener("click",()=>{
     },1200);
 
     
+
+});
+
+function playLobbyMusic(){
+
+    if(
+        currentPhase !== "vampire" &&
+        currentPhase !== "doctor" &&
+        currentPhase !== "vote"
+    ){
+
+        bgMusic.volume = 0.35;
+
+        bgMusic.play()
+        .catch(()=>{});
+
+    }
+
+}
+
+/* SAYFA AÇILINCA */
+
+window.addEventListener("load",()=>{
+
+    setTimeout(()=>{
+
+        playLobbyMusic();
+
+    },200);
+
+});
+
+/* ANA MENÜYE DÖNÜNCE */
+
+function resetScreensToLobby(){
+
+    clearAllGameTimers();
+
+    roleShown = false;
+    gamePhaseListenerActive = false;
+
+    winScreen.classList.add("hidden");
+    gameScreen.classList.add("hidden");
+    nightScreen.classList.add("hidden");
+    voteScreen.classList.add("hidden");
+    roleScreen.classList.add("hidden");
+    countdownScreen.classList.add("hidden");
+
+    document.querySelector(".container")
+    .classList.remove("hidden");
+
+    lobby.classList.remove("hidden");
+
+    vampireTeam.innerHTML = "";
+    voteResult.innerHTML = "";
+
+    currentRole = null;
+
+    countdownRunning = false;
+    doctorPhaseRunning = false;
+    vampirePhaseRunning = false;
+    votingRunning = false;
+    readyListenerStarted = false;
+    votesListenerStarted = false;
+
+    /* BG MUSIC */
+
+    playLobbyMusic();
+
+}
+
+/* BUTTON SOUND */
+
+document.querySelectorAll("button")
+.forEach(btn=>{
+
+    btn.addEventListener("click",()=>{
+
+        tickSound.currentTime = 0;
+
+        tickSound.play();
+
+    });
 
 });
