@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vampir Köylü Online</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="smoke"></div>
+<div class="smoke smoke2"></div>
+<div class="smoke smoke3"></div>
+  <!-- BACKGROUND -->
+
+  <div class="background-overlay"></div>
+  <div class="background-glow"></div>
+
+  <!-- MAIN CONTAINER -->
+
+  <div class="container">
+
+    <!-- LOGO -->
+
+    <div class="logo-box">
+
+      <div class="logo-top">
+        ONLINE
+      </div>
+
+      <h1>
+        VAMPİR
+        <span>KÖYLÜ</span>
+      </h1>
+
+      <p>
+        Gerçek vampiri bul.
+      </p>
+
+    </div>
+
+    <!-- CARD -->
+
+    <div class="card">
+
+      <div class="card-glow"></div>
+
+      <div class="input-group">
+
+        <label>
+          Oyuncu İsmi
+        </label>
+
+        <input
+          type="text"
+          id="playerName"
+          placeholder="İsminizi girin"
+          maxlength="14"
+        >
+
+      </div>
+
+      <div class="buttons">
+
+        <button id="createRoomBtn" class="primary-btn">
+          ODA OLUŞTUR
+        </button>
+
+        <div class="divider">
+          VEYA
+        </div>
+
+        <div class="join-box">
+
+          <div class="input-group">
+
+            <label>
+              Oda Kodu
+            </label>
+
+            <input
+              type="text"
+              id="roomCodeInput"
+              placeholder="ABCDE"
+              maxlength="5"
+            >
+
+          </div>
+
+          <button id="joinRoomBtn" class="secondary-btn">
+            ODAYA KATIL
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- BOTTOM INFO -->
+
+    <div class="bottom-info">
+
+      <div class="info-box">
+        🌙 Online Multiplayer
+      </div>
+
+      <div class="info-box">
+        🩸 Kimseye Güvenme !
+      </div>
+
+    </div>
+
+    <!-- LOBBY -->
+
+    <div id="lobby" class="lobby hidden">
+
+      <div class="lobby-top">
+
+        <h2>
+          ODA:
+          <span id="roomCodeText"></span>
+        </h2>
+
+      </div>
+
+      <div class="players-box">
+
+        <h3>
+          Oyuncular
+        </h3>
+
+        <ul id="playerList"></ul>
+
+      </div>
+
+      <button id="startGameBtn" class="start-btn">
+        OYUNU BAŞLAT
+      </button>
+
+      <!-- CHAT -->
+
+      <div class="chat-box">
+
+        <div id="chatMessages" class="chat-messages"></div>
+
+        <div class="chat-input-area">
+
+          <input
+            type="text"
+            id="chatInput"
+            placeholder="Mesaj yaz..."
+          >
+
+          <button id="sendBtn">
+            Gönder
+          </button>
+
+        </div>
+
+      </div>
+
+      <button id="leaveBtn" class="leave-btn">
+        ODADAN ÇIK
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ROLE SCREEN -->
+
+  <div id="roleScreen" class="role-screen hidden">
+
+    <div class="role-card">
+
+      <div class="role-glow"></div>
+
+      <h1 id="roleTitle">
+        ROL
+      </h1>
+
+      <p id="roleDescription"></p>
+
+      <div id="vampireTeam"></div>
+
+      <button id="continueBtn">
+        DEVAM ET
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- COUNTDOWN -->
+
+  <div id="countdownScreen" class="countdown-screen hidden">
+
+    <h1 id="countdownText">
+      3
+    </h1>
+
+  </div>
+
+  <!-- NIGHT SCREEN -->
+
+  <div id="nightScreen" class="night-screen hidden">
+
+    <div class="night-glow"></div>
+
+    <h1 id="nightTitle">
+      GECE
+    </h1>
+
+    <p id="nightSubtitle">
+      Bekleniyor...
+    </p>
+
+    <div id="nightTimer">
+      10
+    </div>
+
+    <div id="nightPlayers" class="night-players"></div>
+
+  </div>
+
+  <!-- VOTE SCREEN -->
+
+  <div id="voteScreen" class="vote-screen hidden">
+
+    <h1>
+      OYLAMA ZAMANI
+    </h1>
+
+    <p id="voteTimer">
+      10
+    </p>
+
+    <div id="votePlayers"></div>
+
+    <div id="voteResult"></div>
+
+  </div>
+
+  <!-- WIN SCREEN -->
+
+  <div id="winScreen" class="win-screen hidden">
+
+    <div class="win-glow"></div>
+
+    <h1 id="winTitle">
+      KAZANAN
+    </h1>
+
+    <button id="restartGameBtn">
+      YENİ OYUN BAŞLAT
+    </button>
+
+  </div>
+
+  <!-- GAME SCREEN -->
+
+  <div id="gameScreen" class="game-screen hidden">
+
+    <div class="top-bar">
+
+        <button id="leaveGameBtn" class="leave-game-btn">
+    ↩
+  </button>
+
+      <h2 id="phaseText">
+        GÜNDÜZ
+      </h2>
+
+    </div>
+
+    <div id="alivePlayers" class="alive-players"></div>
+
+    <div class="game-chat">
+
+      <div id="gameMessages" class="game-messages"></div>
+
+      <div class="game-input-area">
+
+        <input
+          type="text"
+          id="gameChatInput"
+          placeholder="Mesaj yaz..."
+        >
+
+        <button id="gameSendBtn">
+          Gönder
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script>
+
+    const firebaseConfig = {
+
+      apiKey: "AIzaSyChXJ3MnXRd4hD6hComyvKAjwLkIrj9PGc",
+
+      authDomain: "vampir-koylu-94a49.firebaseapp.com",
+
+      databaseURL: "https://vampir-koylu-94a49-default-rtdb.europe-west1.firebasedatabase.app",
+
+      projectId: "vampir-koylu-94a49",
+
+      storageBucket: "vampir-koylu-94a49.firebasestorage.app",
+
+      messagingSenderId: "414992850960",
+
+      appId: "1:414992850960:web:9b07694ad80c4c0617ea95"
+
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+  </script>
+
+
+<div id="toast"></div>
+
+<div id="confirmLeave" class="confirm-leave hidden">
+
+  <div class="confirm-box">
+
+    <h2>Odadan çıkmak istiyor musun?</h2>
+
+    <div class="confirm-buttons">
+
+      <button id="cancelLeaveBtn">
+        Hayır
+      </button>
+
+      <button id="confirmLeaveBtn">
+        Evet
+      </button>
+
+    </div>
+
+  </div>
+<script src="app.js"></script>
+</div>
+</body>
+</html>
